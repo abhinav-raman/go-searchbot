@@ -13,18 +13,21 @@ A fast and simple terminal-based file search engine written in Go.
 
 ## Installation
 
-1. Clone the repository
+- Clone the repository
+
 ```bash
 git clone <repository-url>
 cd searchbot
 ```
 
-2. Build the project:
+- Build the project:
+
 ```bash
 go build -o s cmd/searchbot/main.go
 ```
 
-3. Make it globally available (choose one):
+- Make it globally available (choose one):
+
 ```bash
 # Option 1 - User specific (recommended)
 mkdir -p ~/bin
@@ -39,6 +42,7 @@ sudo mv s /usr/local/bin/
 ## Usage
 
 Basic usage:
+
 ```bash
 s <search_pattern> [directory]
 ```
@@ -46,6 +50,7 @@ s <search_pattern> [directory]
 If directory is not specified, searches in the current directory.
 
 ### Examples
+
 ```bash
 s document           # Search for files containing "document" in current directory
 s report ~/Documents # Search in specific directory
@@ -59,6 +64,7 @@ s .pdf              # Search for PDF files
 - `-e`: Match exact filename (by default matches substrings)
 
 ### Examples with Options
+
 ```bash
 s -nr report        # Non-recursive search
 s -i Document       # Case insensitive search
@@ -69,6 +75,7 @@ s -i -e Report.txt  # Case insensitive and exact match
 ## Output Format
 
 The search results are displayed in a table format with the following columns:
+
 - Name: File name (truncated if too long)
 - Size: File size in human-readable format (B, KB, MB, GB)
 - Modified: Last modification date and time
@@ -84,4 +91,4 @@ The search results are displayed in a table format with the following columns:
 
 - The search starts from the current directory by default
 - Hidden files and directories (starting with '.') are skipped
-- System directories and node_modules are excluded from search 
+- System directories and node_modules are excluded from search
