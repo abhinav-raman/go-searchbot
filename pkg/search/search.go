@@ -1,6 +1,7 @@
 package search
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -21,6 +22,11 @@ type SearchResult struct {
 	ModTime string
 }
 
+var (
+	ErrEmptyPattern = errors.New("search pattern cannot be empty")
+	ErrInvalidPath  = errors.New("invalid search path")
+)
+
 // shouldSkipDirectory returns true if the directory should be skipped
 func shouldSkipDirectory(path string) bool {
 	// Skip hidden directories and common system paths
@@ -34,6 +40,16 @@ func shouldSkipDirectory(path string) bool {
 
 // SearchFiles searches for files containing the given pattern in their names
 func SearchFiles(pattern string, root string, opts SearchOptions) ([]SearchResult, error) {
+	// Validate inputs
+	if pattern == "" {
+		return nil, ErrEmptyPattern
+	}
+
+	// Check if root exists
+	if _, err := os.Stat(root); err != nil {
+		return nil, ErrInvalidPath
+	}
+
 	var results []SearchResult
 
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
@@ -43,11 +59,11 @@ func SearchFiles(pattern string, root string, opts SearchOptions) ([]SearchResul
 
 		// Handle directories
 		if info.IsDir() {
-			if shouldSkipDirectory(path) {
+			if path != root && !opts.Recursive {
 				return filepath.SkipDir
 			}
-			if path != root && !opts.Recursive {
-				return filepath.SkipDir // Skip subdirectories if not recursive
+			if shouldSkipDirectory(path) {
+				return filepath.SkipDir
 			}
 			return nil
 		}
@@ -57,8 +73,7 @@ func SearchFiles(pattern string, root string, opts SearchOptions) ([]SearchResul
 			return nil
 		}
 
-		// Check if file matches the pattern
-		var matches bool
+		// Prepare strings for comparison
 		fileName := info.Name()
 		searchPattern := pattern
 
@@ -67,6 +82,8 @@ func SearchFiles(pattern string, root string, opts SearchOptions) ([]SearchResul
 			searchPattern = strings.ToLower(searchPattern)
 		}
 
+		// Check if file matches
+		var matches bool
 		if opts.ExactMatch {
 			matches = fileName == searchPattern
 		} else {
@@ -84,5 +101,9 @@ func SearchFiles(pattern string, root string, opts SearchOptions) ([]SearchResul
 		return nil
 	})
 
-	return results, err
+	if err != nil {
+		return nil, err
+	}
+
+	return results, nil
 }
